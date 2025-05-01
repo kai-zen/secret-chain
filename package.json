@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "compile": "node web3/compile.js"
+    "compile": "node web3/compile.js",
+    "deploy": "node web3/deploy.js",
+    "ganache": "ganache"
   },
   "dependencies": {
     "ethers": "^6.13.7",
