@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Contract, ethers, JsonRpcProvider, JsonRpcSigner } from "ethers";
-import contractABI from "../../web3/abi.json"; // ABI file
+import { JsonRpcProvider, JsonRpcSigner } from "ethers";
+import contractABI from "&/abi.json"; // ABI file
+import { Abi, Abi__factory } from "&/types";
 
 export const GANACHE_PORT = 8545;
 const useContract = () => {
-  const [contract, setContract] = useState<Contract | null>(null);
+  const [contract, setContract] = useState<Abi | null>(null);
   const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
   const [provider, setProvider] = useState<JsonRpcProvider | null>(null);
 
@@ -26,11 +27,7 @@ const useContract = () => {
         if (!contractABI)
           throw new Error("Compile the contract before using the app.");
 
-        const _contract = new ethers.Contract(
-          deployedAddress,
-          contractABI,
-          _signer
-        );
+        const _contract = Abi__factory.connect(deployedAddress, _signer);
         setContract(_contract);
       } catch (error) {
         console.error("Error loading contract:", error);

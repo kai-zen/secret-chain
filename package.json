@@ -9,6 +9,7 @@
     "lint": "next lint",
     "compile": "node web3/compile.js",
     "deploy": "node web3/deploy.js",
+    "typechain": "typechain --target ethers-v6 --out-dir web3/types web3/abi.json",
     "ganache": "ganache"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@typechain/ethers-v6": "^0.5.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -28,6 +30,7 @@
     "eslint-config-next": "15.3.1",
     "solc": "^0.8.29",
     "tailwindcss": "^4",
+    "typechain": "^8.3.2",
     "typescript": "^5"
   }
 }
