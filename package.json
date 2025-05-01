@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "compile": "node web3/compile.js"
   },
   "dependencies": {
     "ethers": "^6.13.7",
