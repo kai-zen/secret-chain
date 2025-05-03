@@ -1,0 +1,53 @@
+import { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import { CoingeckoEthereumPriceApiAddress } from "@/helpers/constants";
+import { BigNumberish } from "ethers";
+
+const useEthPrice = () => {
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchEthPrice = async () => {
+      try {
+        const response = await fetch(CoingeckoEthereumPriceApiAddress);
+        if (!response.ok) throw new Error("Failed to fetch ETH price");
+        const data = await response.json();
+        setEthPrice(data.ethereum.usd);
+      } catch (err) {
+        console.error("Error fetching ETH price:", err);
+      }
+    };
+
+    fetchEthPrice();
+  }, []);
+
+  const usdToWei = (usdAmount: number): BigNumberish => {
+    if (!ethPrice) throw new Error("ETH price not loaded");
+    const ethAmount = usdAmount / ethPrice;
+    const roundedEth = parseFloat(ethAmount.toFixed(8));
+    return ethers.parseEther(roundedEth.toString());
+  };
+
+  const ethToWei = (ethAmount: number | string): BigNumberish => {
+    return ethers.parseEther(ethAmount.toString());
+  };
+
+  const weiToUsd = (weiAmount: BigNumberish): number => {
+    if (!ethPrice) throw new Error("ETH price not loaded");
+    const ethAmount = parseFloat(ethers.formatEther(weiAmount));
+    return ethAmount * ethPrice;
+  };
+
+  const weiToEth = (weiAmount: BigNumberish): string => {
+    return ethers.formatEther(weiAmount);
+  };
+
+  return {
+    usdToWei,
+    ethToWei,
+    weiToUsd,
+    weiToEth,
+  };
+};
+
+export default useEthPrice;
