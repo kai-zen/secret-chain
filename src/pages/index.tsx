@@ -1,3 +1,4 @@
+import { AccountPicker } from "@/components/molecules";
 import { useContractContext } from "@/components/providers/ContractContext";
 import useEthPrice from "@/hooks/useEthPrice";
 import { Button } from "@heroui/react";
@@ -35,6 +36,7 @@ export default function Home() {
 
   return (
     <div className="p-4 flex flex-col gap-8 w-full max-w-[480px]">
+      <AccountPicker />
       {isLoading ? (
         <p>Uploading secret...</p>
       ) : (

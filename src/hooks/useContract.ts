@@ -11,7 +11,7 @@ const useContract = () => {
   const [provider, setProvider] = useState<JsonRpcProvider | null>(null);
 
   const [accounts, setAccounts] = useState<PopulatedAccount[]>([]);
-  const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
+  const [signerAddress, setSignerAddress] = useState<string | null>(null);
 
   // 1.Set provider
   useEffect(() => {
@@ -32,32 +32,53 @@ const useContract = () => {
     const handleAccounts = async () => {
       if (provider) {
         const ganacheAccounts = await provider.listAccounts();
-        const _defaultSigner = ganacheAccounts[0];
-        setSigner(_defaultSigner);
-        storeAllAvailableAccounts(ganacheAccounts, provider);
+        const _defaultSigner = ganacheAccounts[0]?.address;
+        if (_defaultSigner) {
+          setSignerAddress(_defaultSigner);
+          storeAllAvailableAccounts(ganacheAccounts, provider);
+        }
       }
     };
     if (provider) handleAccounts();
   }, [provider]);
 
   useEffect(() => {
-    try {
-      const deployedAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
-      if (!deployedAddress)
-        throw new Error("Deploy the contract before using the app.");
-      if (!contractABI)
-        throw new Error("Compile the contract before using the app.");
+    const handleLoadContract = async () => {
+      try {
+        const deployedAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+        if (!deployedAddress)
+          throw new Error("Deploy the contract before using the app.");
+        if (!contractABI)
+          throw new Error("Compile the contract before using the app.");
 
-      if (signer) {
-        const _contract = Abi__factory.connect(deployedAddress, signer);
-        setContract(_contract);
+        if (signerAddress && provider) {
+          const signer = await provider.getSigner(signerAddress);
+          const _contract = Abi__factory.connect(deployedAddress, signer);
+          setContract(_contract);
+        }
+      } catch (error) {
+        console.error("Error loading contract:", error);
       }
-    } catch (error) {
-      console.error("Error loading contract:", error);
-    }
-  }, [signer]);
+    };
+    if (signerAddress && provider) handleLoadContract();
+  }, [provider, signerAddress]);
 
-  return { contract, provider, signer, accounts };
+  const handleChangeSigner = (newSignerAddress) => {
+    if (accounts.length) {
+      const theSigner = accounts.find(
+        (acc) => acc.address === newSignerAddress
+      );
+      if (theSigner) setSignerAddress(theSigner.address);
+    }
+  };
+
+  return {
+    contract,
+    provider,
+    signer: signerAddress,
+    accounts,
+    handleChangeSigner,
+  };
 };
 
 export default useContract;

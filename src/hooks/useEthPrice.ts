@@ -8,18 +8,28 @@ const useEthPrice = () => {
 
   useEffect(() => {
     const fetchEthPrice = async () => {
-      try {
-        const response = await fetch(CoingeckoEthereumPriceApiAddress);
-        if (!response.ok) throw new Error("Failed to fetch ETH price");
-        const data = await response.json();
-        setEthPrice(data.ethereum.usd);
-      } catch (err) {
-        console.error("Error fetching ETH price:", err);
+      if (!ethPrice) {
+        const ssesionStorageEth = sessionStorage.getItem("ethPrice");
+        if (ssesionStorageEth) setEthPrice(Number(ssesionStorageEth));
+        else {
+          try {
+            const response = await fetch(CoingeckoEthereumPriceApiAddress);
+            if (!response.ok) throw new Error("Failed to fetch ETH price");
+            const data = await response.json();
+            const ethPrice = data.ethereum.usd;
+            if (ethPrice) {
+              sessionStorage.setItem("ethPrice", ethPrice);
+              setEthPrice(ethPrice);
+            }
+          } catch (err) {
+            console.error("Error fetching ETH price:", err);
+          }
+        }
       }
     };
 
     fetchEthPrice();
-  }, []);
+  }, [ethPrice]);
 
   const usdToWei = (usdAmount: number): BigNumberish => {
     if (!ethPrice) throw new Error("ETH price not loaded");
