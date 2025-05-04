@@ -1,7 +1,7 @@
-import { AccountPicker } from "@/components/molecules";
+import { AccountPicker, EmptyView } from "@/components/molecules";
 import { useContractContext } from "@/components/providers/ContractContext";
 import useEthPrice from "@/hooks/useEthPrice";
-import { Button } from "@heroui/react";
+import { Button, Divider } from "@heroui/react";
 import { useState } from "react";
 
 export default function Home() {
@@ -9,6 +9,8 @@ export default function Home() {
   const { usdToWei } = useEthPrice();
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
 
   const submitSecret = async () => {
     if (contract) {
@@ -34,6 +36,12 @@ export default function Home() {
     }
   };
 
+  const handleOpenCreateSecret = () => {
+    setIsCreateFormOpen(true);
+  };
+
+  const isEmpty = true;
+
   return (
     <div className="p-4 flex flex-col gap-8 w-full max-w-[480px] mx-auto">
       <header className="flex justify-between items-center gap-4">
@@ -53,6 +61,10 @@ export default function Home() {
           Blockchain powered string selling marketplace.
         </p>
       </section>
+      <Divider />
+      {isEmpty ? (
+        <EmptyView handleOpenCreateSecret={handleOpenCreateSecret} />
+      ) : null}
       {isLoading ? (
         <p>Uploading secret...</p>
       ) : (
