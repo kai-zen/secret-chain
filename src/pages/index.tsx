@@ -35,8 +35,24 @@ export default function Home() {
   };
 
   return (
-    <div className="p-4 flex flex-col gap-8 w-full max-w-[480px]">
-      <AccountPicker />
+    <div className="p-4 flex flex-col gap-8 w-full max-w-[480px] mx-auto">
+      <header className="flex justify-between items-center gap-4">
+        <h1 className="font-semibold text-sm">
+          Secrets
+          <br />
+          Marketplace
+        </h1>
+        <AccountPicker />
+      </header>
+      <section>
+        <h3 className="text-lg font-semibold">
+          You have a <span className="text-primary">SECRET</span>?
+          <br /> Sell at your desired price.
+        </h3>
+        <p className="text-xs mt-2">
+          Blockchain powered string selling marketplace.
+        </p>
+      </section>
       {isLoading ? (
         <p>Uploading secret...</p>
       ) : (
