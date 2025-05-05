@@ -1,13 +1,19 @@
-import { AccountPicker, EmptyView } from "@/components/molecules";
-import { Divider } from "@heroui/react";
+import {
+  AccountPicker,
+  CreateSecretForm,
+  EmptyView,
+} from "@/components/molecules";
+import {
+  Divider,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+} from "@heroui/react";
 import { useState } from "react";
 
 export default function Home() {
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
-
-  const handleOpenCreateSecret = () => {
-    setIsCreateFormOpen(true);
-  };
 
   const isEmpty = true;
 
@@ -32,8 +38,31 @@ export default function Home() {
       </section>
       <Divider />
       {isEmpty ? (
-        <EmptyView handleOpenCreateSecret={handleOpenCreateSecret} />
+        <EmptyView
+          handleOpenCreateSecret={() => {
+            setIsCreateFormOpen(true);
+          }}
+        />
       ) : null}
+      <Modal
+        isOpen={isCreateFormOpen}
+        onOpenChange={() => {
+          setIsCreateFormOpen(false);
+        }}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="text-foreground">
+                Let&apos;s add a secret
+              </ModalHeader>
+              <ModalBody>
+                <CreateSecretForm afterSubmit={onClose} />
+              </ModalBody>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { ContractProvider } from "@/components/providers/ContractContext";
+import { ToastProvider } from "@/components/providers/ToastContext";
 import "@/styles/globals.css";
 import { HeroUIProvider } from "@heroui/react";
 import type { AppProps } from "next/app";
@@ -20,14 +21,16 @@ const spaceMono = Space_Mono({
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <HeroUIProvider>
-      <ContractProvider>
-        <main
-          className={`${ibmPlexMono.variable} ${spaceMono.variable} dark text-foreground bg-background`}
-        >
-          <Component {...pageProps} />
-        </main>
-      </ContractProvider>
-    </HeroUIProvider>
+    <main
+      className={`${ibmPlexMono.variable} ${spaceMono.variable} dark text-foreground bg-background`}
+    >
+      <HeroUIProvider>
+        <ToastProvider>
+          <ContractProvider>
+            <Component {...pageProps} />
+          </ContractProvider>
+        </ToastProvider>
+      </HeroUIProvider>
+    </main>
   );
 }
