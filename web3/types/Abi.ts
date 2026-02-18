@@ -53,25 +53,25 @@ export declare namespace Secrets {
 export interface AbiInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "accessKeys"
       | "addSecret"
       | "balances"
+      | "checkAccess"
       | "getSecretsCount"
       | "getSecretsPaginated"
+      | "hasAccess"
       | "platformBalance"
       | "platformFeeBips"
       | "platformOwner"
-      | "secrets"
       | "unlockSecret"
+      | "viewSecretContent"
       | "withdrawBalance"
       | "withdrawPlatformFees"
   ): FunctionFragment;
 
   getEvent(
-    nameOrSignatureOrTopic: "SecretAdded" | "SecretUnlocked"
+    nameOrSignatureOrTopic: "SecretAdded" | "SecretUnlocked" | "Withdrawn"
   ): EventFragment;
 
-  encodeFunctionData(functionFragment: "accessKeys", values: [string]): string;
   encodeFunctionData(
     functionFragment: "addSecret",
     values: [string, string, string, BigNumberish]
@@ -81,12 +81,20 @@ export interface AbiInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "checkAccess",
+    values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getSecretsCount",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getSecretsPaginated",
     values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "hasAccess",
+    values: [BigNumberish, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "platformBalance",
@@ -101,11 +109,11 @@ export interface AbiInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "secrets",
+    functionFragment: "unlockSecret",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "unlockSecret",
+    functionFragment: "viewSecretContent",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -117,9 +125,12 @@ export interface AbiInterface extends Interface {
     values?: undefined
   ): string;
 
-  decodeFunctionResult(functionFragment: "accessKeys", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "addSecret", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balances", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "checkAccess",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getSecretsCount",
     data: BytesLike
@@ -128,6 +139,7 @@ export interface AbiInterface extends Interface {
     functionFragment: "getSecretsPaginated",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "hasAccess", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "platformBalance",
     data: BytesLike
@@ -140,9 +152,12 @@ export interface AbiInterface extends Interface {
     functionFragment: "platformOwner",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "secrets", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "unlockSecret",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "viewSecretContent",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -172,12 +187,25 @@ export namespace SecretUnlockedEvent {
   export type InputTuple = [
     secretId: BigNumberish,
     buyer: AddressLike,
-    amount: BigNumberish
+    price: BigNumberish
   ];
-  export type OutputTuple = [secretId: bigint, buyer: string, amount: bigint];
+  export type OutputTuple = [secretId: bigint, buyer: string, price: bigint];
   export interface OutputObject {
     secretId: bigint;
     buyer: string;
+    price: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace WithdrawnEvent {
+  export type InputTuple = [account: AddressLike, amount: BigNumberish];
+  export type OutputTuple = [account: string, amount: bigint];
+  export interface OutputObject {
+    account: string;
     amount: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -229,8 +257,6 @@ export interface Abi extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  accessKeys: TypedContractMethod<[arg0: string], [boolean], "view">;
-
   addSecret: TypedContractMethod<
     [title: string, description: string, content: string, price: BigNumberish],
     [bigint],
@@ -238,6 +264,12 @@ export interface Abi extends BaseContract {
   >;
 
   balances: TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
+
+  checkAccess: TypedContractMethod<
+    [secretId: BigNumberish, user: AddressLike],
+    [boolean],
+    "view"
+  >;
 
   getSecretsCount: TypedContractMethod<[], [bigint], "view">;
 
@@ -247,31 +279,28 @@ export interface Abi extends BaseContract {
     "view"
   >;
 
+  hasAccess: TypedContractMethod<
+    [arg0: BigNumberish, arg1: AddressLike],
+    [boolean],
+    "view"
+  >;
+
   platformBalance: TypedContractMethod<[], [bigint], "view">;
 
   platformFeeBips: TypedContractMethod<[], [bigint], "view">;
 
   platformOwner: TypedContractMethod<[], [string], "view">;
 
-  secrets: TypedContractMethod<
-    [arg0: BigNumberish],
-    [
-      [bigint, string, string, string, string, bigint] & {
-        id: bigint;
-        owner: string;
-        title: string;
-        description: string;
-        content: string;
-        price: bigint;
-      }
-    ],
-    "view"
-  >;
-
   unlockSecret: TypedContractMethod<
     [secretId: BigNumberish],
     [void],
     "payable"
+  >;
+
+  viewSecretContent: TypedContractMethod<
+    [secretId: BigNumberish],
+    [string],
+    "view"
   >;
 
   withdrawBalance: TypedContractMethod<[], [void], "nonpayable">;
@@ -283,9 +312,6 @@ export interface Abi extends BaseContract {
   ): T;
 
   getFunction(
-    nameOrSignature: "accessKeys"
-  ): TypedContractMethod<[arg0: string], [boolean], "view">;
-  getFunction(
     nameOrSignature: "addSecret"
   ): TypedContractMethod<
     [title: string, description: string, content: string, price: BigNumberish],
@@ -296,6 +322,13 @@ export interface Abi extends BaseContract {
     nameOrSignature: "balances"
   ): TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
   getFunction(
+    nameOrSignature: "checkAccess"
+  ): TypedContractMethod<
+    [secretId: BigNumberish, user: AddressLike],
+    [boolean],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "getSecretsCount"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
@@ -303,6 +336,13 @@ export interface Abi extends BaseContract {
   ): TypedContractMethod<
     [start: BigNumberish, count: BigNumberish],
     [Secrets.SecretStructOutput[]],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "hasAccess"
+  ): TypedContractMethod<
+    [arg0: BigNumberish, arg1: AddressLike],
+    [boolean],
     "view"
   >;
   getFunction(
@@ -315,24 +355,11 @@ export interface Abi extends BaseContract {
     nameOrSignature: "platformOwner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "secrets"
-  ): TypedContractMethod<
-    [arg0: BigNumberish],
-    [
-      [bigint, string, string, string, string, bigint] & {
-        id: bigint;
-        owner: string;
-        title: string;
-        description: string;
-        content: string;
-        price: bigint;
-      }
-    ],
-    "view"
-  >;
-  getFunction(
     nameOrSignature: "unlockSecret"
   ): TypedContractMethod<[secretId: BigNumberish], [void], "payable">;
+  getFunction(
+    nameOrSignature: "viewSecretContent"
+  ): TypedContractMethod<[secretId: BigNumberish], [string], "view">;
   getFunction(
     nameOrSignature: "withdrawBalance"
   ): TypedContractMethod<[], [void], "nonpayable">;
@@ -354,9 +381,16 @@ export interface Abi extends BaseContract {
     SecretUnlockedEvent.OutputTuple,
     SecretUnlockedEvent.OutputObject
   >;
+  getEvent(
+    key: "Withdrawn"
+  ): TypedContractEvent<
+    WithdrawnEvent.InputTuple,
+    WithdrawnEvent.OutputTuple,
+    WithdrawnEvent.OutputObject
+  >;
 
   filters: {
-    "SecretAdded(uint256,address)": TypedContractEvent<
+    "SecretAdded(uint96,address)": TypedContractEvent<
       SecretAddedEvent.InputTuple,
       SecretAddedEvent.OutputTuple,
       SecretAddedEvent.OutputObject
@@ -367,7 +401,7 @@ export interface Abi extends BaseContract {
       SecretAddedEvent.OutputObject
     >;
 
-    "SecretUnlocked(uint256,address,uint256)": TypedContractEvent<
+    "SecretUnlocked(uint96,address,uint256)": TypedContractEvent<
       SecretUnlockedEvent.InputTuple,
       SecretUnlockedEvent.OutputTuple,
       SecretUnlockedEvent.OutputObject
@@ -376,6 +410,17 @@ export interface Abi extends BaseContract {
       SecretUnlockedEvent.InputTuple,
       SecretUnlockedEvent.OutputTuple,
       SecretUnlockedEvent.OutputObject
+    >;
+
+    "Withdrawn(address,uint256)": TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
+    >;
+    Withdrawn: TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
     >;
   };
 }

@@ -6,7 +6,7 @@ const path = require("path");
 // Configuration
 const RPC_URL = process.env.RPC_URL || "http://127.0.0.1:8545";
 const PRIVATE_KEY = process.env.PRIVATE_KEY; // Optional: for non-Ganache deployments
-const PLATFORM_FEE_BIPS_RAW = process.env.PLATFORM_FEE_BIPS ?? "200"; // Default: 2% (200 basis points)
+const PLATFORM_FEE_BIPS_RAW = process.env.PLATFORM_FEE_BIPS || "200"; // Default: 2% (200 basis points)
 const ENV_FILE = path.resolve(__dirname, "..", ".env");
 
 // Parse and validate fee (contract expects 0–10000)
@@ -31,7 +31,6 @@ const deployContract = async () => {
       process.exit(1);
     }
 
-    // Get signer
     let signer;
     let signerAddress;
     if (PRIVATE_KEY) {
@@ -44,8 +43,24 @@ const deployContract = async () => {
         console.error("Error: No accounts available. Make sure Ganache is running.");
         process.exit(1);
       }
-      signerAddress = accounts[0];
-      signer = await provider.getSigner(signerAddress);
+      
+      const firstAccount = accounts[0];
+      
+      // Handle different return types from listAccounts()
+      if (typeof firstAccount === "string") {
+        signerAddress = firstAccount;
+        signer = await provider.getSigner(signerAddress);
+      } else if (firstAccount && typeof firstAccount.getAddress === "function") {
+        signer = firstAccount;
+        signerAddress = await signer.getAddress();
+      } else if (firstAccount && firstAccount.address) {
+        signerAddress = firstAccount.address;
+        signer = await provider.getSigner(signerAddress);
+      } else {
+        console.error("Error: Unexpected account format from provider");
+        process.exit(1);
+      }
+      
       console.log(`Using account: ${signerAddress}`);
     }
 
@@ -73,12 +88,30 @@ const deployContract = async () => {
       process.exit(1);
     }
 
-    const abi = JSON.parse(fs.readFileSync(abiPath, "utf8"));
-    const bytecode = JSON.parse(fs.readFileSync(bytecodePath, "utf8"));
+    let abi, bytecode;
+    try {
+      abi = JSON.parse(fs.readFileSync(abiPath, "utf8"));
+      bytecode = JSON.parse(fs.readFileSync(bytecodePath, "utf8"));
+    } catch (error) {
+      console.error("Error: Failed to parse ABI or bytecode JSON files");
+      console.error(error.message);
+      process.exit(1);
+    }
 
     if (!abi || !bytecode) {
       console.error("Error: Invalid ABI or bytecode");
       process.exit(1);
+    }
+
+    // Ensure bytecode is a string and add 0x prefix if missing
+    if (typeof bytecode !== "string") {
+      console.error("Error: Bytecode must be a string");
+      process.exit(1);
+    }
+    // Remove quotes if present and ensure 0x prefix
+    bytecode = bytecode.trim().replace(/^["']|["']$/g, "");
+    if (!bytecode.startsWith("0x")) {
+      bytecode = "0x" + bytecode;
     }
 
     console.log(`\nDeploying contract with platform fee: ${feeBips} bips (${(feeBips / 100).toFixed(2)}%)...`);
@@ -86,10 +119,12 @@ const deployContract = async () => {
     const factory = new ContractFactory(abi, bytecode, signer);
     const contract = await factory.deploy(feeBips);
 
-    console.log(`Transaction hash: ${contract.deploymentTransaction()?.hash}`);
+    const deploymentTx = contract.deploymentTransaction();
+    if (deploymentTx && deploymentTx.hash) {
+      console.log(`Transaction hash: ${deploymentTx.hash}`);
+    }
     console.log("Waiting for deployment confirmation...");
 
-    // Wait for deployment
     await contract.waitForDeployment();
     const contractAddress = await contract.getAddress();
 
@@ -97,19 +132,39 @@ const deployContract = async () => {
     console.log(`  Address: ${contractAddress}`);
     console.log(`  Platform fee: ${feeBips} bips (${(feeBips / 100).toFixed(2)}%)`);
 
-    // Update .env file
     updateEnvFile(contractAddress);
 
     console.log(`\n✓ Contract address saved to .env file`);
     console.log(`  Run 'npm run typechain' to regenerate TypeScript types.`);
   } catch (error) {
-    console.error("\nError during deployment:", error.message);
+    console.error("\n❌ Error during deployment:");
+    console.error(`Message: ${error.message}`);
+    
     if (error.reason) {
       console.error(`Reason: ${error.reason}`);
     }
     if (error.data) {
       console.error(`Data: ${JSON.stringify(error.data)}`);
     }
+    if (error.code) {
+      console.error(`Error code: ${error.code}`);
+    }
+    if (error.transaction) {
+      console.error(`Transaction: ${JSON.stringify(error.transaction, null, 2)}`);
+    }
+    
+    // Common error messages
+    if (error.message.includes("insufficient funds")) {
+      console.error("\n💡 Tip: Make sure your account has enough ETH to deploy the contract.");
+    }
+    if (error.message.includes("nonce")) {
+      console.error("\n💡 Tip: Try resetting your account nonce or wait a moment.");
+    }
+    if (error.message.includes("network") || error.message.includes("connection")) {
+      console.error("\n💡 Tip: Check that Ganache is running or your RPC endpoint is accessible.");
+    }
+    
+    console.error("\nFull error:", error);
     process.exit(1);
   }
 };

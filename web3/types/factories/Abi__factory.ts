@@ -9,25 +9,70 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint256",
-        name: "_feeBips",
-        type: "uint256",
+        internalType: "uint16",
+        name: "feeBips",
+        type: "uint16",
       },
     ],
     stateMutability: "nonpayable",
     type: "constructor",
   },
   {
+    inputs: [],
+    name: "AlreadyHasAccess",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "CannotBuyOwnSecret",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InvalidRange",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InvalidSecretIndex",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NoBalance",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "ReentrantCall",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "TransferFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "Unauthorized",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "Underpaid",
+    type: "error",
+  },
+  {
     anonymous: false,
     inputs: [
       {
         indexed: true,
-        internalType: "uint256",
+        internalType: "uint96",
         name: "secretId",
-        type: "uint256",
+        type: "uint96",
       },
       {
-        indexed: false,
+        indexed: true,
         internalType: "address",
         name: "owner",
         type: "address",
@@ -41,14 +86,33 @@ const _abi = [
     inputs: [
       {
         indexed: true,
-        internalType: "uint256",
+        internalType: "uint96",
         name: "secretId",
-        type: "uint256",
+        type: "uint96",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "buyer",
+        type: "address",
       },
       {
         indexed: false,
+        internalType: "uint256",
+        name: "price",
+        type: "uint256",
+      },
+    ],
+    name: "SecretUnlocked",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
         internalType: "address",
-        name: "buyer",
+        name: "account",
         type: "address",
       },
       {
@@ -58,27 +122,8 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "SecretUnlocked",
+    name: "Withdrawn",
     type: "event",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
-    ],
-    name: "accessKeys",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
   },
   {
     inputs: [
@@ -106,9 +151,9 @@ const _abi = [
     name: "addSecret",
     outputs: [
       {
-        internalType: "uint256",
+        internalType: "uint96",
         name: "secretId",
-        type: "uint256",
+        type: "uint96",
       },
     ],
     stateMutability: "nonpayable",
@@ -128,6 +173,30 @@ const _abi = [
         internalType: "uint256",
         name: "",
         type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "secretId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
+    name: "checkAccess",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
       },
     ],
     stateMutability: "view",
@@ -164,9 +233,9 @@ const _abi = [
       {
         components: [
           {
-            internalType: "uint256",
+            internalType: "uint96",
             name: "id",
-            type: "uint256",
+            type: "uint96",
           },
           {
             internalType: "address",
@@ -203,6 +272,30 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "hasAccess",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "platformBalance",
     outputs: [
@@ -220,9 +313,9 @@ const _abi = [
     name: "platformFeeBips",
     outputs: [
       {
-        internalType: "uint256",
+        internalType: "uint16",
         name: "",
-        type: "uint256",
+        type: "uint16",
       },
     ],
     stateMutability: "view",
@@ -245,44 +338,13 @@ const _abi = [
     inputs: [
       {
         internalType: "uint256",
-        name: "",
+        name: "secretId",
         type: "uint256",
       },
     ],
-    name: "secrets",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "id",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        internalType: "string",
-        name: "title",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "description",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "content",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "price",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
+    name: "unlockSecret",
+    outputs: [],
+    stateMutability: "payable",
     type: "function",
   },
   {
@@ -293,9 +355,15 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "unlockSecret",
-    outputs: [],
-    stateMutability: "payable",
+    name: "viewSecretContent",
+    outputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
