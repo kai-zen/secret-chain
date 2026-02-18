@@ -3,10 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "compile": "node web3/compile.js",
     "deploy": "node web3/deploy.js",
     "typechain": "typechain --target ethers-v6 --out-dir web3/types web3/abi.json",

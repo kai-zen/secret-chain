@@ -4,12 +4,12 @@ pragma solidity ^0.8.28;
 /// @title Secrets marketplace with payments and access tracking
 contract Secrets {
     address public immutable platformOwner;
-    uint16 public immutable platformFeeBips; // e.g. 500 = 5%
+    uint16 public immutable platformFeeBips; // e.g. 500 = 5% (max 10,000 = 100%)
     uint256 public platformBalance;
 
     struct Secret {
-        uint256 id;
-        address owner;
+        uint96 id;
+        address owner; // Packed with uint96 id in same slot
         string title;
         string description;
         string content;
@@ -19,11 +19,7 @@ contract Secrets {
 
     mapping(address => uint256) public balances;
     mapping(uint256 => mapping(address => bool)) public hasAccess;
-
-    // Reentrancy guard
-    uint8 private constant NOT_ENTERED = 1;
-    uint8 private constant ENTERED = 2;
-    uint8 private status = NOT_ENTERED;
+    bool private locked;
 
     // Custom errors (gas efficient)
     error Unauthorized();
@@ -36,9 +32,9 @@ contract Secrets {
     error TransferFailed();
     error InvalidRange();
 
-    event SecretAdded(uint256 indexed secretId, address indexed owner);
+    event SecretAdded(uint96 indexed secretId, address indexed owner);
     event SecretUnlocked(
-        uint256 indexed secretId,
+        uint96 indexed secretId,
         address indexed buyer,
         uint256 price
     );
@@ -50,10 +46,10 @@ contract Secrets {
     }
 
     modifier nonReentrant() {
-        if (status == ENTERED) revert ReentrantCall();
-        status = ENTERED;
+        if (locked) revert ReentrantCall();
+        locked = true;
         _;
-        status = NOT_ENTERED;
+        locked = false;
     }
 
     constructor(uint16 feeBips) {
@@ -67,8 +63,8 @@ contract Secrets {
         string memory description,
         string memory content,
         uint256 price
-    ) external returns (uint256 secretId) {
-        secretId = secrets.length;
+    ) external returns (uint96 secretId) {
+        secretId = uint96(secrets.length);
         secrets.push(
             Secret({
                 id: secretId,
@@ -82,12 +78,12 @@ contract Secrets {
         emit SecretAdded(secretId, msg.sender);
     }
 
-    function unlockSecret(uint256 secretIndex) external payable nonReentrant {
-        if (secretIndex >= secrets.length) revert InvalidSecretIndex();
+    function unlockSecret(uint256 secretId) external payable nonReentrant {
+        if (secretId >= secrets.length) revert InvalidSecretIndex();
 
-        Secret storage secret = secrets[secretIndex];
+        Secret storage secret = secrets[secretId];
         if (secret.owner == msg.sender) revert CannotBuyOwnSecret();
-        if (hasAccess[secretIndex][msg.sender]) revert AlreadyHasAccess();
+        if (hasAccess[secretId][msg.sender]) revert AlreadyHasAccess();
         if (msg.value < secret.price) revert Underpaid();
 
         uint256 price = secret.price;
@@ -96,7 +92,7 @@ contract Secrets {
 
         balances[secret.owner] += sellerAmount;
         platformBalance += fee;
-        hasAccess[secretIndex][msg.sender] = true;
+        hasAccess[secretId][msg.sender] = true;
 
         // Refund overpayment
         uint256 refund = msg.value - price;
@@ -105,7 +101,7 @@ contract Secrets {
             if (!refundSent) revert TransferFailed();
         }
 
-        emit SecretUnlocked(secretIndex, msg.sender, price);
+        emit SecretUnlocked(uint96(secretId), msg.sender, price);
     }
 
     function withdrawBalance() external nonReentrant {
@@ -153,21 +149,21 @@ contract Secrets {
     }
 
     function checkAccess(
-        uint256 secretIndex,
+        uint256 secretId,
         address user
     ) external view returns (bool) {
-        if (secretIndex >= secrets.length) return false;
-        if (secrets[secretIndex].owner == user) return true;
-        return hasAccess[secretIndex][user];
+        if (secretId >= secrets.length) return false;
+        if (secrets[secretId].owner == user) return true;
+        return hasAccess[secretId][user];
     }
 
     function viewSecretContent(
-        uint256 secretIndex
+        uint256 secretId
     ) external view returns (string memory) {
-        if (secretIndex >= secrets.length) revert InvalidSecretIndex();
+        if (secretId >= secrets.length) revert InvalidSecretIndex();
 
-        Secret storage secret = secrets[secretIndex];
-        if (secret.owner != msg.sender && !hasAccess[secretIndex][msg.sender])
+        Secret storage secret = secrets[secretId];
+        if (secret.owner != msg.sender && !hasAccess[secretId][msg.sender])
             revert Unauthorized();
         return secret.content;
     }
