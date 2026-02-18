@@ -4,7 +4,7 @@ import contractABI from "&/abi.json"; // ABI file
 import { Abi, Abi__factory } from "&/types";
 import { PopulatedAccount } from "@/helpers/types";
 import { handlePopulateAccounts } from "@/helpers/functions";
-import { GANACHE_PORT } from "@/helpers/constants";
+import { GANACHE_PORT, InfuraHttpsProvider } from "@/helpers/constants";
 
 const useContract = () => {
   const [contract, setContract] = useState<Abi | null>(null);
@@ -15,7 +15,7 @@ const useContract = () => {
 
   // 1.Set provider
   useEffect(() => {
-    const _provider = new JsonRpcProvider(`http://127.0.0.1:${GANACHE_PORT}`);
+    const _provider = new JsonRpcProvider(InfuraHttpsProvider);
     setProvider(_provider);
   }, []);
 
