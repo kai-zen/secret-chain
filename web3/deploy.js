@@ -11,7 +11,7 @@ const ENV_FILE = path.resolve(__dirname, "..", ".env");
 
 // Parse and validate fee (contract expects 0–10000)
 const feeBips = parseInt(PLATFORM_FEE_BIPS_RAW, 10);
-if (Number.isNaN(feeBips) || feeBips < 0 || feeBips > 10000) {
+if (Number.isNaN(feeBips) || feeBips < 0 || feeBips > 10_000) {
   console.error("Error: PLATFORM_FEE_BIPS must be a number between 0 and 10000");
   process.exit(1);
 }

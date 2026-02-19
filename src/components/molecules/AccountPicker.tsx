@@ -22,7 +22,7 @@ const AccountPicker: FC = () => {
       <Dropdown>
         <DropdownTrigger>
           <Button
-            className="capitalize w-fit"
+            className="capitalize w-fit cursor-pointer"
             variant="bordered"
             endContent={<IconChevronDown />}
           >
@@ -30,7 +30,7 @@ const AccountPicker: FC = () => {
           </Button>
         </DropdownTrigger>
         <DropdownMenu
-          onAction={(key) => handleChangeSigner(key)}
+          onAction={(key) => handleChangeSigner(key as string)}
           aria-label="Dropdown Variants"
         >
           {(accounts || []).map((acc) => {
@@ -38,8 +38,11 @@ const AccountPicker: FC = () => {
             return (
               <DropdownItem
                 key={acc.address}
+                textValue={acc.address}
                 className={
-                  isSelected ? "bg-gray-700 text-foreground" : "text-foreground"
+                  isSelected
+                    ? "bg-gray-700 text-foreground cursor-auto"
+                    : "text-foreground cursor-pointer"
                 }
               >
                 <div className="flex items-center gap-2">
@@ -63,7 +66,7 @@ const AccountPicker: FC = () => {
                   <p className="text-sm max-w-[240px] text-clip break-all">
                     {acc.address}{" "}
                     <span className="text-xs text-primary">
-                      ({acc.balance} eth)
+                      ({Number(acc.balance).toFixed(4)} eth)
                     </span>
                   </p>
                 </div>

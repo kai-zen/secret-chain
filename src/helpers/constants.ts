@@ -6,3 +6,5 @@ export const CoingeckoEthereumPriceApiAddress =
 export const InfuraApiKey = "8d392928355a446e91c340a75c4dc749";
 export const InfuraHttpsProvider =
   "https://mainnet.infura.io/v3/8d392928355a446e91c340a75c4dc749";
+
+export const LocalHostProvider = "http://127.0.0.1:8545";

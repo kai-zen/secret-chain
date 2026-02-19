@@ -14,7 +14,7 @@ const EmptyView: FC<Pros> = ({ handleOpenCreateSecret }) => {
       <p>You can create first secret here!</p>
       <Button
         color="primary"
-        className="mt-2"
+        className="mt-2 cursor-pointer"
         onPress={handleOpenCreateSecret}
         variant="shadow"
       >

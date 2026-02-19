@@ -4,7 +4,7 @@ import contractABI from "&/abi.json"; // ABI file
 import { Abi, Abi__factory } from "&/types";
 import { PopulatedAccount } from "@/helpers/types";
 import { handlePopulateAccounts } from "@/helpers/functions";
-import { GANACHE_PORT, InfuraHttpsProvider } from "@/helpers/constants";
+import { LocalHostProvider } from "@/helpers/constants";
 
 const useContract = () => {
   const [contract, setContract] = useState<Abi | null>(null);
@@ -15,30 +15,38 @@ const useContract = () => {
 
   // 1.Set provider
   useEffect(() => {
-    const _provider = new JsonRpcProvider(InfuraHttpsProvider);
+    const _provider = new JsonRpcProvider(LocalHostProvider);
     setProvider(_provider);
   }, []);
 
-  const storeAllAvailableAccounts = async (
-    ganacheAccounts: JsonRpcSigner[],
-    provider: JsonRpcProvider | null
-  ) => {
-    const allAccounts = await handlePopulateAccounts(ganacheAccounts, provider);
-    setAccounts(allAccounts);
-  };
-
   // 2. Set signer & available accounts
   useEffect(() => {
+    const storeAllAvailableAccounts = async (
+      ganacheAccounts: JsonRpcSigner[],
+      provider: JsonRpcProvider | null,
+    ) => {
+      const allAccounts = await handlePopulateAccounts(
+        ganacheAccounts,
+        provider,
+      );
+      setAccounts(allAccounts);
+    };
+
     const handleAccounts = async () => {
-      if (provider) {
-        const ganacheAccounts = await provider.listAccounts();
-        const _defaultSigner = ganacheAccounts[0]?.address;
-        if (_defaultSigner) {
-          setSignerAddress(_defaultSigner);
-          storeAllAvailableAccounts(ganacheAccounts, provider);
+      try {
+        if (provider) {
+          const ganacheAccounts = await provider.listAccounts();
+          const _defaultSigner = ganacheAccounts[0]?.address;
+          if (_defaultSigner) {
+            setSignerAddress(_defaultSigner);
+            await storeAllAvailableAccounts(ganacheAccounts, provider);
+          }
         }
+      } catch (err) {
+        console.error("Error storing accounts:", err);
       }
     };
+
     if (provider) handleAccounts();
   }, [provider]);
 
@@ -63,12 +71,13 @@ const useContract = () => {
     if (signerAddress && provider) handleLoadContract();
   }, [provider, signerAddress]);
 
-  const handleChangeSigner = (newSignerAddress) => {
+  const handleChangeSigner = (newSignerAddress: string) => {
     if (accounts.length) {
       const theSigner = accounts.find(
-        (acc) => acc.address === newSignerAddress
+        (acc) => acc.address === newSignerAddress,
       );
-      if (theSigner) setSignerAddress(theSigner.address);
+      if (theSigner && signerAddress !== theSigner.address)
+        setSignerAddress(theSigner.address);
     }
   };
 
