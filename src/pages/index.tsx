@@ -12,7 +12,7 @@ export default function Home() {
 
   const isEmpty = true;
 
-  console.log(secretsData);
+  console.log("secretsData", secretsData);
 
   return (
     <>

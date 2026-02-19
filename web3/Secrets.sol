@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.28;
+pragma solidity ^0.8.23;
 
 /// @title Secrets marketplace with payments and access tracking
 contract Secrets {
@@ -137,7 +137,9 @@ contract Secrets {
         uint256 start,
         uint256 count
     ) external view returns (SecretSummary[] memory) {
-        if (start >= secrets.length || count == 0) revert InvalidRange();
+        if (start >= secrets.length || count == 0) {
+            return new SecretSummary[](0);
+        }
 
         uint256 end = start + count;
         if (end > secrets.length) end = secrets.length;
