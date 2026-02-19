@@ -16,21 +16,18 @@ const useSecretsData = () => {
       if (!contract) return;
       try {
         const { getSecretsCount, getSecretsPaginated } = contract;
+
         const countResp = await getSecretsCount();
+        console.log("Secrets count response:", countResp);
         const count = Number(countResp);
         if (!isNaN(count)) setTotalCount(count);
-        console.log("Secrets count response:", countResp);
 
         if (count > 0) {
           const response = await getSecretsPaginated(0, Math.min(8, count));
-
-          // ethers v6 returns a Result (Proxy) — convert to plain array of objects
           const list = Array.from(response || []).map((item: any) =>
             secretListProxyToObject(item, weiToUsd),
           );
           setSecretsData(list);
-        } else {
-          setSecretsData([]);
         }
       } catch (err) {
         console.log("Error fetching secrets", err);
@@ -41,7 +38,8 @@ const useSecretsData = () => {
     if (shouldRefetch && contract) {
       fetchSecrets();
     }
-  }, [contract, shouldRefetch, weiToUsd]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contract, shouldRefetch]);
 
   const refetchHandler = () => setShouldRefetch((prev) => !prev);
 

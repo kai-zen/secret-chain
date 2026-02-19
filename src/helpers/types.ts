@@ -5,3 +5,15 @@ export type PopulatedAccount = {
 };
 
 export type SubmitSecretPayloadDTO = [string, string, string, number];
+
+export interface SecretDT {
+  id: number;
+  title: string;
+  price: string;
+}
+
+export interface SecretDetailsDT extends SecretDT {
+  owner?: string;
+  description?: string;
+  content?: string;
+}
