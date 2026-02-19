@@ -3,3 +3,5 @@ export type PopulatedAccount = {
   balance: string;
   source: "ganache" | "metamask";
 };
+
+export type SubmitSecretPayloadDTO = [string, string, string, number];

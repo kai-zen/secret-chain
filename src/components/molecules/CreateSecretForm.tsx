@@ -4,6 +4,7 @@ import { FC, useState } from "react";
 import { useContractContext } from "@/components/providers/ContractContext";
 import { useToast } from "@/components/providers/ToastContext";
 import { InputLabel } from ".";
+import { SubmitSecretPayloadDTO } from "@/helpers/types";
 
 interface Props {
   afterSubmit?: () => void;
@@ -24,8 +25,8 @@ const CreateSecretForm: FC<Props> = ({ afterSubmit }) => {
 
   const submitSecret = async () => {
     if (contract) {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
         const params = {
           title: values.title,
           description: values.description,
@@ -33,7 +34,7 @@ const CreateSecretForm: FC<Props> = ({ afterSubmit }) => {
           price: usdToWei(values.price),
         };
         const response = await contract.addSecret(
-          ...(Object.values(params) as any)
+          ...(Object.values(params) as SubmitSecretPayloadDTO),
         );
         addToast({
           title: "Success",
@@ -71,6 +72,7 @@ const CreateSecretForm: FC<Props> = ({ afterSubmit }) => {
           onValueChange={(newVal) => {
             setValues((prev) => ({ ...prev, title: newVal }));
           }}
+          className="text-foreground"
         />
       </InputLabel>
       <InputLabel label="Description">
@@ -80,6 +82,7 @@ const CreateSecretForm: FC<Props> = ({ afterSubmit }) => {
           onValueChange={(newVal) => {
             setValues((prev) => ({ ...prev, description: newVal }));
           }}
+          className="text-foreground"
         />
       </InputLabel>
       <InputLabel label="Price ($)">
@@ -88,9 +91,11 @@ const CreateSecretForm: FC<Props> = ({ afterSubmit }) => {
           onValueChange={(newVal) => {
             setValues((prev) => ({ ...prev, price: newVal }));
           }}
+          step={0.5}
+          className="text-foreground"
         />
       </InputLabel>
-      <InputLabel label="The SECRET" isPrimary>
+      <InputLabel label="The SECRET">
         <Input
           description="Enter your secret content, we won't tell anyone unless they pay."
           isRequired

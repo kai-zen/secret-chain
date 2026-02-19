@@ -14,6 +14,7 @@ module.exports = {
     heroui({
       defaultTheme: "dark",
       defaultExtendTheme: "dark",
+      extendThemes: ["dark"],
       layout: {},
       themes: {
         dark: {

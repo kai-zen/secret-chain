@@ -15,6 +15,11 @@ contract Secrets {
         string content;
         uint256 price;
     }
+    struct SecretSummary {
+        uint96 id;
+        string title;
+        uint256 price;
+    }
     Secret[] private secrets;
 
     mapping(address => uint256) public balances;
@@ -131,21 +136,33 @@ contract Secrets {
     function getSecretsPaginated(
         uint256 start,
         uint256 count
-    ) external view returns (Secret[] memory) {
+    ) external view returns (SecretSummary[] memory) {
         if (start >= secrets.length || count == 0) revert InvalidRange();
 
         uint256 end = start + count;
         if (end > secrets.length) end = secrets.length;
 
         uint256 length = end - start;
-        Secret[] memory result = new Secret[](length);
+        SecretSummary[] memory result = new SecretSummary[](length);
 
         unchecked {
             for (uint256 i = 0; i < length; ++i) {
-                result[i] = secrets[start + i];
+                Secret storage s = secrets[start + i];
+                result[i] = SecretSummary({
+                    id: s.id,
+                    title: s.title,
+                    price: s.price
+                });
             }
         }
         return result;
+    }
+
+    function getSecretDetails(
+        uint256 secretId
+    ) external view returns (Secret memory) {
+        if (secretId >= secrets.length) revert InvalidSecretIndex();
+        return secrets[secretId];
     }
 
     function checkAccess(

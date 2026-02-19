@@ -5,34 +5,42 @@ const useSecretsData = () => {
   const { contract } = useContractContext();
 
   const [totalCount, setTotalCount] = useState(0);
-  const [secretsData, setSecretsData] = useState(null);
+  const [secretsData, setSecretsData] = useState<any[]>([]);
   const [shouldRefetch, setShouldRefetch] = useState(true);
 
   useEffect(() => {
-    const fetchSecretsCount = async () => {
-      if (contract) {
-        const response = await contract.getSecretsCount();
-        if (!isNaN(Number(response))) setTotalCount(Number(response));
-        console.log(Number(response));
-      }
-    };
+    const fetchSecrets = async () => {
+      if (!contract) return;
+      try {
+        const countResp = await contract.getSecretsCount();
+        const count = Number(countResp);
+        if (!isNaN(count)) setTotalCount(count);
+        console.log("Secrets count response:", countResp);
 
-    const fetchSecretsPaginated = async () => {
-      if (contract) {
-        try {
-          const response = await contract.getSecretsPaginated(0, 8);
-          console.log(response);
-        } catch (err) {
-          console.log("Error fetching secrets", err);
+        if (count > 0) {
+          const response = await contract.getSecretsPaginated(
+            0,
+            Math.min(8, count),
+          );
+          setSecretsData(response);
+          console.log("Paginated secrets response:", response);
+        } else {
+          setSecretsData([]);
         }
+      } catch (err) {
+        console.log("Error fetching secrets", err);
+        setSecretsData([]);
       }
     };
 
     if (shouldRefetch && contract) {
-      fetchSecretsCount();
-      fetchSecretsPaginated();
+      fetchSecrets();
     }
   }, [contract, shouldRefetch]);
+
+  const refetchHandler = () => setShouldRefetch((prev) => !prev);
+
+  return { totalCount, secretsData, refetchHandler };
 };
 
 export default useSecretsData;

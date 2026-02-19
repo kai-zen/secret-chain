@@ -203,6 +203,57 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "secretId",
+        type: "uint256",
+      },
+    ],
+    name: "getSecretDetails",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint96",
+            name: "id",
+            type: "uint96",
+          },
+          {
+            internalType: "address",
+            name: "owner",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "title",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "description",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "content",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "price",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct Secrets.Secret",
+        name: "",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "getSecretsCount",
     outputs: [
@@ -238,23 +289,8 @@ const _abi = [
             type: "uint96",
           },
           {
-            internalType: "address",
-            name: "owner",
-            type: "address",
-          },
-          {
             internalType: "string",
             name: "title",
-            type: "string",
-          },
-          {
-            internalType: "string",
-            name: "description",
-            type: "string",
-          },
-          {
-            internalType: "string",
-            name: "content",
             type: "string",
           },
           {
@@ -263,7 +299,7 @@ const _abi = [
             type: "uint256",
           },
         ],
-        internalType: "struct Secrets.Secret[]",
+        internalType: "struct Secrets.SecretSummary[]",
         name: "",
         type: "tuple[]",
       },

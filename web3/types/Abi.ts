@@ -48,6 +48,18 @@ export declare namespace Secrets {
     content: string;
     price: bigint;
   };
+
+  export type SecretSummaryStruct = {
+    id: BigNumberish;
+    title: string;
+    price: BigNumberish;
+  };
+
+  export type SecretSummaryStructOutput = [
+    id: bigint,
+    title: string,
+    price: bigint
+  ] & { id: bigint; title: string; price: bigint };
 }
 
 export interface AbiInterface extends Interface {
@@ -56,6 +68,7 @@ export interface AbiInterface extends Interface {
       | "addSecret"
       | "balances"
       | "checkAccess"
+      | "getSecretDetails"
       | "getSecretsCount"
       | "getSecretsPaginated"
       | "hasAccess"
@@ -83,6 +96,10 @@ export interface AbiInterface extends Interface {
   encodeFunctionData(
     functionFragment: "checkAccess",
     values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getSecretDetails",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "getSecretsCount",
@@ -129,6 +146,10 @@ export interface AbiInterface extends Interface {
   decodeFunctionResult(functionFragment: "balances", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "checkAccess",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getSecretDetails",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -271,11 +292,17 @@ export interface Abi extends BaseContract {
     "view"
   >;
 
+  getSecretDetails: TypedContractMethod<
+    [secretId: BigNumberish],
+    [Secrets.SecretStructOutput],
+    "view"
+  >;
+
   getSecretsCount: TypedContractMethod<[], [bigint], "view">;
 
   getSecretsPaginated: TypedContractMethod<
     [start: BigNumberish, count: BigNumberish],
-    [Secrets.SecretStructOutput[]],
+    [Secrets.SecretSummaryStructOutput[]],
     "view"
   >;
 
@@ -329,13 +356,20 @@ export interface Abi extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "getSecretDetails"
+  ): TypedContractMethod<
+    [secretId: BigNumberish],
+    [Secrets.SecretStructOutput],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "getSecretsCount"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "getSecretsPaginated"
   ): TypedContractMethod<
     [start: BigNumberish, count: BigNumberish],
-    [Secrets.SecretStructOutput[]],
+    [Secrets.SecretSummaryStructOutput[]],
     "view"
   >;
   getFunction(
