@@ -26,6 +26,8 @@ export const ContractProvider = ({ children }: { children: ReactNode }) => {
   const [secretsData, setSecretsData] = useState<SecretDT[]>([]);
   const [shouldRefetch, setShouldRefetch] = useState(true);
 
+  const refetchHandler = () => setShouldRefetch((prev) => !prev);
+
   useEffect(() => {
     const { contract } = contractData;
     const fetchSecrets = async () => {
@@ -51,13 +53,10 @@ export const ContractProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    if (shouldRefetch && contract) {
-      fetchSecrets();
-    }
+    if (contract) fetchSecrets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contractData, shouldRefetch]);
 
-  const refetchHandler = () => setShouldRefetch((prev) => !prev);
   const value = { totalCount, secretsData, refetchHandler, ...contractData };
 
   return (

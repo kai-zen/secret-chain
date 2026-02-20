@@ -2,9 +2,9 @@ import { SecretDT } from "@/helpers/types";
 import { Button, cn } from "@heroui/react";
 import { IconPlus } from "@tabler/icons-react";
 import { FC, useMemo, useState } from "react";
-import { EmptyView } from "../molecules";
-import { SecretCard } from ".";
-import { CreateSecretModal } from "../modals";
+import { EmptyView } from "@/components/molecules";
+import { SecretCard } from "@/components/home";
+import { CreateSecretModal } from "@/components/modals";
 
 interface Props {
   secretsData: SecretDT[];
