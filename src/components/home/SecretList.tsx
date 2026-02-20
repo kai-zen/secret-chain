@@ -16,7 +16,7 @@ const SecretList: FC<Props> = ({ secretsData, totalCount }) => {
   const isEmpty = !secretsData?.length;
 
   const { allData, oddArray, evenArray } = useMemo(() => {
-    const { evenArray, oddArray } = secretsData.reduce(
+    const { evenArray, oddArray } = (secretsData || []).reduce(
       (acc, val, i) => {
         acc[i % 2 === 0 ? "evenArray" : "oddArray"].push(val);
         return acc;

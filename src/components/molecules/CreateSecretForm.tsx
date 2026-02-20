@@ -11,7 +11,7 @@ interface Props {
 }
 
 const CreateSecretForm: FC<Props> = ({ afterSubmit }) => {
-  const { contract } = useContractContext();
+  const { contract, refetchHandler } = useContractContext();
   const { usdToWei } = useEthPrice();
   const { addToast } = useToast();
 
@@ -51,6 +51,7 @@ const CreateSecretForm: FC<Props> = ({ afterSubmit }) => {
         console.error("Error creating secret:", error);
       } finally {
         setIsLoading(false);
+        refetchHandler();
         afterSubmit?.();
       }
     }

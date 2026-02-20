@@ -1,12 +1,12 @@
 import { HeroSection } from "@/components/home";
 import SecretList from "@/components/home/SecretList";
 import { Header } from "@/components/layout";
-import useSecretsData from "@/hooks/useSecretsData";
+import { useContractContext } from "@/components/providers/ContractContext";
 import { Divider } from "@heroui/react";
 import { NextPage } from "next";
 
 const Home: NextPage = () => {
-  const { totalCount, secretsData } = useSecretsData();
+  const { totalCount, secretsData } = useContractContext();
 
   return (
     <>
