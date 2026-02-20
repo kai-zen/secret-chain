@@ -2,13 +2,14 @@ import { useContractContext } from "@/components/providers/ContractContext";
 import { useEffect, useState } from "react";
 import useEthPrice from "./useEthPrice";
 import { secretListProxyToObject } from "@/helpers/convertors";
+import { SecretDT } from "@/helpers/types";
 
 const useSecretsData = () => {
   const { contract } = useContractContext();
   const { weiToUsd } = useEthPrice();
 
   const [totalCount, setTotalCount] = useState(0);
-  const [secretsData, setSecretsData] = useState<any[]>([]);
+  const [secretsData, setSecretsData] = useState<SecretDT[]>([]);
   const [shouldRefetch, setShouldRefetch] = useState(true);
 
   useEffect(() => {
