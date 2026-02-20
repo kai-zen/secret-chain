@@ -14,7 +14,6 @@ const useEthPrice = () => {
         else {
           try {
             const response = await fetch(CoingeckoEthereumPriceApiAddress);
-            if (!response.ok) throw new Error("Failed to fetch ETH price");
             const data = await response.json();
             const ethPrice = data.ethereum.usd;
             if (ethPrice) {

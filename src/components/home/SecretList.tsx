@@ -49,7 +49,7 @@ const SecretList: FC<Props> = ({ secretsData, totalCount }) => {
           <EmptyView handleOpenCreateSecret={() => setIsCreateFormOpen(true)} />
         ) : (
           <div className="mt-4">
-            <div className="sm:hidden">
+            <div className="sm:hidden flex flex-col gap-4 w-full">
               {allData.map((secret) => (
                 <SecretCard secret={secret} key={secret.id} />
               ))}

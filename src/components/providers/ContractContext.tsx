@@ -20,6 +20,7 @@ const ContractContext = createContext<ContractContextType | null>(null);
 
 export const ContractProvider = ({ children }: { children: ReactNode }) => {
   const contractData = useContract();
+  const { contract } = contractData;
   const { weiToUsd } = useEthPrice();
 
   const [totalCount, setTotalCount] = useState(0);
@@ -29,7 +30,6 @@ export const ContractProvider = ({ children }: { children: ReactNode }) => {
   const refetchHandler = () => setShouldRefetch((prev) => !prev);
 
   useEffect(() => {
-    const { contract } = contractData;
     const fetchSecrets = async () => {
       if (!contract) return;
       try {
@@ -55,7 +55,7 @@ export const ContractProvider = ({ children }: { children: ReactNode }) => {
 
     if (contract) fetchSecrets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contractData, shouldRefetch]);
+  }, [contract, shouldRefetch]);
 
   const value = { totalCount, secretsData, refetchHandler, ...contractData };
 
